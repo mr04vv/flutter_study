@@ -14,8 +14,6 @@ class OfferList extends StatefulWidget {
 }
 
 class OfferListState extends State<OfferList> {
-  bool loading = true;
-
   ScrollController _scrollController;
 
   void _scrollListener() {
@@ -23,10 +21,8 @@ class OfferListState extends State<OfferList> {
         _scrollController.position.maxScrollExtent) {
       final store = Provider.of<OfferListStore>(context, listen: false);
       if (store.isLastPage) return;
-      setState(() {
-        loading = true;
-      });
-      startLoader(store);
+      store.setIsLoading(true);
+      _load(store);
     }
   }
 
@@ -39,15 +35,9 @@ class OfferListState extends State<OfferList> {
     _load(store);
   }
 
-  void startLoader(OfferListStore store) {
-    _load(store);
-  }
-
   Future<void> _load(OfferListStore store) async {
     final page = store.page;
-    final isLastPage = store.isLastPage;
     final offers = store.offers;
-    if (isLastPage) return;
     try {
       var url =
           "https://baity2-stg-api.herokuapp.com/api/search_requests?page=${page.toString()}&per=10";
@@ -70,9 +60,7 @@ class OfferListState extends State<OfferList> {
           store.setOffer(offers);
         }
       }
-      setState(() {
-        loading = false;
-      });
+      store.setIsLoading(false);
     } finally {}
   }
 
@@ -85,8 +73,8 @@ class OfferListState extends State<OfferList> {
       appBar: AppBar(
         title: Text('求人一覧'),
       ),
-      body:
-          LoadingOverlay(child: _buildSuggestions(offers), isLoading: loading),
+      body: LoadingOverlay(
+          child: _buildSuggestions(offers), isLoading: value.loading),
     );
   }
 
@@ -152,6 +140,7 @@ class OfferListStore with ChangeNotifier {
   List<Offer> offers = [];
   bool isLastPage = false;
   int page = 1;
+  bool loading = true;
 
   void setOffer(List<Offer> offers) {
     this.offers = offers;
@@ -165,6 +154,11 @@ class OfferListStore with ChangeNotifier {
 
   void setPage(int page) {
     this.page = page;
+    notifyListeners();
+  }
+
+  void setIsLoading(bool loading) {
+    this.loading = loading;
     notifyListeners();
   }
 }
