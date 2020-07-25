@@ -66,15 +66,14 @@ class OfferListState extends State<OfferList> {
 
   @override
   Widget build(BuildContext context) {
-    final value = Provider.of<OfferListStore>(context);
-    final offers = value.offers;
-
     return Scaffold(
       appBar: AppBar(
         title: Text('求人一覧'),
       ),
       body: LoadingOverlay(
-          child: _buildSuggestions(offers), isLoading: value.loading),
+          child: _buildSuggestions(
+              context.select((OfferListStore store) => store.offers)),
+          isLoading: context.select((OfferListStore store) => store.loading)),
     );
   }
 

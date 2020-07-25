@@ -85,6 +85,7 @@ class OfferDetail extends StatelessWidget {
     final loading = store.loading;
     final fetched = store.fetched;
     final offerId = ModalRoute.of(context).settings.arguments;
+    debugPrint("ss");
     if (!fetched && offerId != null) {
       startLoader(context, offerId);
     }
