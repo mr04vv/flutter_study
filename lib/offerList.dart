@@ -19,10 +19,10 @@ class OfferListState extends State<OfferList> {
   void _scrollListener() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
-      final store = Provider.of<OfferListStore>(context, listen: false);
+      final store = context.read<OfferListStore>();
       if (store.isLastPage) return;
       store.setIsLoading(true);
-      _load(store);
+      _load();
     }
   }
 
@@ -31,11 +31,11 @@ class OfferListState extends State<OfferList> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(() => _scrollListener());
-    final store = Provider.of<OfferListStore>(context, listen: false);
-    _load(store);
+    _load();
   }
 
-  Future<void> _load(OfferListStore store) async {
+  Future<void> _load() async {
+    final store = context.read<OfferListStore>();
     final page = store.page;
     final offers = store.offers;
     try {

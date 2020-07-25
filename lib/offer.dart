@@ -14,19 +14,23 @@ class OfferDetail extends StatelessWidget {
   }
 
   Future<void> _load(BuildContext context, String offerId) async {
+    final store = context.select((OfferStore store) => store);
     try {
       var url = "https://baity2-stg-api.herokuapp.com/api/requests/${offerId}";
       var resp = await http.get(url);
       var data = OfferResponseDto.fromJson(json.decode(resp.body));
       if (data != null && data.request is Offer) {
-        context.read<OfferStore>().setOffer(data.request);
+        store.setOffer(data.request);
       }
-      context.read<OfferStore>().setIsLoading(false);
-      context.read<OfferStore>().setFetched(true);
+      store.setIsLoading(false);
+      store.setFetched(true);
     } finally {}
   }
 
-  Widget _buildSuggestions(Offer offer, bool loading, bool fetched) {
+  Widget _buildSuggestions(BuildContext context) {
+    final store = context.select((OfferStore store) => store);
+    final loading = store.loading;
+    final offer = store.offer;
     if (loading) {
       return Container();
     } else if (offer == null) {
@@ -79,24 +83,18 @@ class OfferDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final store = Provider.of<OfferStore>(context);
-
-    final offer = store.offer;
-    final loading = store.loading;
-    final fetched = store.fetched;
+    final loading = context.select((OfferStore store) => store.loading);
+    final fetched = context.select((OfferStore store) => store.fetched);
     final offerId = ModalRoute.of(context).settings.arguments;
-    debugPrint("ss");
     if (!fetched && offerId != null) {
       startLoader(context, offerId);
     }
-
     return Scaffold(
         appBar: AppBar(
           title: Text('求人詳細'),
         ),
         body: LoadingOverlay(
-            child: _buildSuggestions(offer, loading, fetched),
-            isLoading: loading));
+            child: _buildSuggestions(context), isLoading: loading));
   }
 }
 
